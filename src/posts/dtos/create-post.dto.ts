@@ -8,10 +8,10 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class CreateBlogDto {
+export class CreatePostDto {
   @ApiProperty({
-    description: 'Blog title',
-    example: 'This is blog title',
+    description: 'Post title',
+    example: 'This is post title',
   })
   @IsString()
   @IsNotEmpty()
@@ -20,8 +20,8 @@ export class CreateBlogDto {
   title: string;
 
   @ApiPropertyOptional({
-    description: 'Blog short description',
-    example: 'This is blog short description',
+    description: 'Post short description',
+    example: 'This is post short description',
     required: false,
   })
   @IsString()
@@ -31,8 +31,8 @@ export class CreateBlogDto {
   shortDescription?: string;
 
   @ApiPropertyOptional({
-    description: 'Blog full description',
-    example: 'This is blog full description',
+    description: 'Post full description',
+    example: 'This is post full description',
     required: false,
   })
   @IsString()
@@ -43,7 +43,7 @@ export class CreateBlogDto {
 
   @ApiPropertyOptional({
     description: 'feature image Url',
-    example: 'http://localhost:3000/images/blog-image-1.jpg',
+    example: 'http://localhost:3000/images/post-image-1.jpg',
     required: false,
   })
   @IsString()
@@ -53,7 +53,7 @@ export class CreateBlogDto {
 
   @ApiPropertyOptional({
     description: 'main image Url',
-    example: 'http://localhost:3000/images/blog-image-1.jpg',
+    example: 'http://localhost:3000/images/post-image-1.jpg',
     required: false,
   })
   @IsString()

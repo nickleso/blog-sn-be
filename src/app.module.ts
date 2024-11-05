@@ -6,14 +6,14 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import enviromentValidation from './config/environment.validation';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BlogsModule } from './blogs/blogs.module';
+import { PostsModule } from './posts/posts.module';
 import { HealthCheckController } from './healthcheck/healthcheck.module';
 
 const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [
-    BlogsModule,
+    PostsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
