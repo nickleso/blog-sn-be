@@ -43,7 +43,7 @@ export class CreatePostDto {
 
   @ApiPropertyOptional({
     description: 'feature image Url',
-    example: 'http://localhost:3000/images/post-image-1.jpg',
+    example: 'uploads/featureImage-1.jpg',
     required: false,
   })
   @IsString()
@@ -53,7 +53,7 @@ export class CreatePostDto {
 
   @ApiPropertyOptional({
     description: 'main image Url',
-    example: 'http://localhost:3000/images/post-image-1.jpg',
+    example: 'uploads/mainImage-1.jpg',
     required: false,
   })
   @IsString()

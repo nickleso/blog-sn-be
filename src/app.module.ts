@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import enviromentValidation from './config/environment.validation';
@@ -20,7 +20,15 @@ const ENV = process.env.NODE_ENV;
       load: [appConfig, databaseConfig],
       validationSchema: enviromentValidation,
     }),
-    // MongooseModule.forRoot('mongodb://localhost/nest'),
+
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const uri = configService.get<string>('database.MONGODB_URL');
+        return { uri };
+      },
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AppController, HealthCheckController],
   providers: [AppService],
