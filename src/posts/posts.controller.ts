@@ -27,7 +27,7 @@ const storage = diskStorage({
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const extension = extname(file.originalname);
-    const prefix = file.fieldname === 'featureImageUrl' ? 'feature' : 'main';
+    const prefix = file.fieldname === 'featureImage' ? 'feature' : 'main';
     callback(null, `${prefix}-${uniqueSuffix}${extension}`);
   },
 });
