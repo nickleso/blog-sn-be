@@ -2,16 +2,26 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { PatchPostDto } from '../dtos/patch-post.dto';
+
+import * as fs from 'fs';
+import * as path from 'path';
 import { Post } from '../schemas/post.schemas';
 
 @Injectable()
 export class PostsService {
   constructor(@InjectModel(Post.name) private postModel: Model<Post>) {}
+
+  private deleteFile(filePath: string) {
+    fs.unlink(path.resolve(filePath), (err) => {
+      if (err) console.error('Failed to delete file:', err);
+    });
+  }
 
   async findAll(limit: number, page: number) {
     try {
@@ -25,8 +35,10 @@ export class PostsService {
       ]);
 
       return {
-        data: posts,
-        meta: {
+        status: HttpStatus.OK,
+        message: 'Posts fetched successfully',
+        data: {
+          posts,
           totalPosts,
           limit,
           page,
@@ -34,55 +46,117 @@ export class PostsService {
         },
       };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch posts');
+      throw new InternalServerErrorException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Failed to fetch posts',
+        error: error.message,
+      });
     }
   }
-  async findOne(id: string): Promise<Post> {
+
+  async findOne(id: string) {
     try {
       const post = await this.postModel.findById(id).exec();
       if (!post) {
-        throw new NotFoundException(`Post with ID ${id} not found`);
+        throw new NotFoundException({
+          status: HttpStatus.NOT_FOUND,
+          message: `Post with ID ${id} not found`,
+        });
       }
-      return post;
+      return {
+        status: HttpStatus.OK,
+        message: 'Post fetched successfully',
+        data: post,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to fetch the post');
+      throw new InternalServerErrorException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Failed to fetch post',
+        error: error.message,
+      });
     }
   }
 
-  async create(createPostDto: CreatePostDto): Promise<Post> {
+  async create(createPostDto: CreatePostDto) {
     try {
-      const newPost = new this.postModel(createPostDto);
-      return await newPost.save();
+      const newPost = await new this.postModel(createPostDto).save();
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Post created successfully',
+        data: newPost,
+      };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create post');
+      throw new InternalServerErrorException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Failed to create post',
+        error: error.message,
+      });
     }
   }
 
-  async update(id: string, patchPostDto: PatchPostDto): Promise<Post> {
+  async update(id: string, patchPostDto: PatchPostDto) {
     try {
+      const post = await this.postModel.findById(id).exec();
+      if (!post) {
+        throw new NotFoundException({
+          status: HttpStatus.NOT_FOUND,
+          message: `Post with ID ${id} not found`,
+        });
+      }
+
+      if (patchPostDto.featureImageUrl && post.featureImageUrl) {
+        this.deleteFile(post.featureImageUrl);
+      }
+      if (patchPostDto.mainImageUrl && post.mainImageUrl) {
+        this.deleteFile(post.mainImageUrl);
+      }
+
       const updatedPost = await this.postModel
         .findByIdAndUpdate(id, patchPostDto, { new: true })
         .exec();
-      if (!updatedPost) {
-        throw new NotFoundException(`Post with ID ${id} not found`);
-      }
-      return updatedPost;
+      return {
+        status: HttpStatus.OK,
+        message: `Post with ID ${id} updated successfully`,
+        data: updatedPost,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to update post');
+      throw new InternalServerErrorException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Failed to update post',
+        error: error.message,
+      });
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     try {
-      const result = await this.postModel.findByIdAndDelete(id).exec();
-      if (!result) {
-        throw new NotFoundException(`Post with ID ${id} not found`);
+      const post = await this.postModel.findByIdAndDelete(id).exec();
+      if (!post) {
+        throw new NotFoundException({
+          status: HttpStatus.NOT_FOUND,
+          message: `Post with ID ${id} not found`,
+        });
       }
+
+      if (post.featureImageUrl) {
+        this.deleteFile(post.featureImageUrl);
+      }
+      if (post.mainImageUrl) {
+        this.deleteFile(post.mainImageUrl);
+      }
+
+      return {
+        status: HttpStatus.OK,
+        message: `Post with ID ${id} deleted successfully`,
+      };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to delete post');
+      throw new InternalServerErrorException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Failed to delete post',
+        error: error.message,
+      });
     }
   }
 }

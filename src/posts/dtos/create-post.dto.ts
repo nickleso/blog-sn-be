@@ -48,7 +48,7 @@ export class CreatePostDto {
   })
   @IsString()
   @IsOptional()
-  @IsUrl()
+  // @IsUrl()
   featureImageUrl?: string;
 
   @ApiPropertyOptional({
@@ -58,6 +58,6 @@ export class CreatePostDto {
   })
   @IsString()
   @IsOptional()
-  @IsUrl()
+  // @IsUrl()
   mainImageUrl?: string;
 }
