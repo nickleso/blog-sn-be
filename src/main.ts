@@ -6,9 +6,12 @@ import { AllExceptionsFilter } from './filters/exception-filter';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
+const PORT = process.env.PORT;
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -27,13 +30,13 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setVersion('1.0')
-    .setTitle('ZIAC backend API')
-    .setDescription('Use the base API URL at http://localhost:3000')
-    .addServer('http://localhost:3000')
+    .setTitle('Blog backend API')
+    .setDescription(`Use the base API URL at http://localhost:${PORT}`)
+    .addServer(`http://localhost:${PORT}`)
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  await app.listen(PORT ?? 4000);
 }
 bootstrap();
