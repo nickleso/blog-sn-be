@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,19 +17,19 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';
 import { GetPostsParamDto } from './dtos/get-posts-param.dto';
 import { PostsService } from './providers/posts.service';
-// import { diskStorage } from 'multer';
-// import { extname } from 'path';
-// import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
-// const storage = diskStorage({
-//   destination: './uploads',
-//   filename: (req, file, callback) => {
-//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-//     const extension = extname(file.originalname);
-//     const prefix = file.fieldname === 'featureImage' ? 'feature' : 'main';
-//     callback(null, `${prefix}-${uniqueSuffix}${extension}`);
-//   },
-// });
+const storage = diskStorage({
+  destination: './uploads',
+  filename: (req, file, callback) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const extension = extname(file.originalname);
+    const prefix = file.fieldname === 'featureImage' ? 'feature' : 'main';
+    callback(null, `${prefix}-${uniqueSuffix}${extension}`);
+  },
+});
 
 @Controller('posts')
 export class PostsController {
@@ -83,23 +82,41 @@ export class PostsController {
     summary: 'Added a new post to the application.',
   })
   @Post()
-  // @UseInterceptors(
-  //   FileInterceptor('featureImage', { storage }),
-  //   FileInterceptor('mainImage', { storage }),
-  // )
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'featureImage', maxCount: 1 },
+        { name: 'mainImage', maxCount: 1 },
+      ],
+      { storage },
+    ),
+  )
   public async createPost(
     @Body() createPostDto: CreatePostDto,
-    // @UploadedFile() featureImage: Express.Multer.File,
-    // @UploadedFile() mainImage: Express.Multer.File,
+    @UploadedFiles()
+    files: {
+      featureImage?: Express.Multer.File[];
+      mainImage?: Express.Multer.File[];
+    },
   ) {
-    // if (featureImage) {
-    //   createPostDto.featureImageUrl = featureImage.path.replace(/\\/g, '/');
-    // }
-    // if (mainImage) {
-    //   createPostDto.mainImageUrl = mainImage.path.replace(/\\/g, '/');
-    // }
-
-    return this.postsService.create(createPostDto);
+    try {
+      console.log(files.featureImage);
+      if (files.featureImage && files.featureImage[0]) {
+        createPostDto.featureImageUrl = files.featureImage[0].path.replace(
+          /\\/g,
+          '/',
+        );
+      }
+      if (files.mainImage && files.mainImage[0]) {
+        createPostDto.mainImageUrl = files.mainImage[0].path.replace(
+          /\\/g,
+          '/',
+        );
+      }
+      return this.postsService.create(createPostDto);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @ApiResponse({
@@ -109,25 +126,31 @@ export class PostsController {
   @ApiOperation({
     summary: 'Updated existing post of the application.',
   })
-  @Patch('/:id')
-  // @UseInterceptors(
-  //   FileInterceptor('featureImage', { storage }),
-  //   FileInterceptor('mainImage', { storage }),
-  // )
   public async patchPost(
     @Param('id') id: string,
     @Body() patchPostDto: PatchPostDto,
-    // @UploadedFile() featureImage: Express.Multer.File,
-    // @UploadedFile() mainImage: Express.Multer.File,
+    @UploadedFiles()
+    files: {
+      featureImage?: Express.Multer.File[];
+      mainImage?: Express.Multer.File[];
+    },
   ) {
-    // if (featureImage) {
-    //   patchPostDto.featureImageUrl = featureImage.path.replace(/\\/g, '/');
-    // }
-    // if (mainImage) {
-    //   patchPostDto.mainImageUrl = mainImage.path.replace(/\\/g, '/');
-    // }
+    try {
+      if (files.featureImage && files.featureImage[0]) {
+        patchPostDto.featureImageUrl = files.featureImage[0].path.replace(
+          /\\/g,
+          '/',
+        );
+      }
+      if (files.mainImage && files.mainImage[0]) {
+        patchPostDto.mainImageUrl = files.mainImage[0].path.replace(/\\/g, '/');
+      }
 
-    return this.postsService.update(id, patchPostDto);
+      return this.postsService.update(id, patchPostDto);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @ApiResponse({

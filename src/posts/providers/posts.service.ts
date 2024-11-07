@@ -34,6 +34,8 @@ export class PostsService {
         this.postModel.countDocuments().exec(),
       ]);
 
+      console.log(posts);
+
       return {
         status: HttpStatus.OK,
         message: 'Posts fetched successfully',
