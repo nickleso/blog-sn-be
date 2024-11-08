@@ -3,13 +3,13 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Post extends Document {
-  @Prop({ required: true, minlength: 3, maxlength: 96 })
+  @Prop({ required: true, minlength: 3, maxlength: 512 })
   title: string;
 
-  @Prop({ minlength: 3, maxlength: 1024 })
+  @Prop({ minlength: 3, maxlength: 5000 })
   shortDescription?: string;
 
-  @Prop({ minlength: 3, maxlength: 1024 })
+  @Prop({ minlength: 3, maxlength: 5000 })
   fullDescription?: string;
 
   @Prop()

@@ -16,7 +16,7 @@ export class CreatePostDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
-  @MaxLength(96)
+  @MaxLength(512)
   title: string;
 
   @ApiPropertyOptional({
@@ -27,7 +27,7 @@ export class CreatePostDto {
   @IsString()
   @IsOptional()
   @MinLength(3)
-  @MaxLength(1024)
+  @MaxLength(5000)
   shortDescription?: string;
 
   @ApiPropertyOptional({
@@ -38,7 +38,7 @@ export class CreatePostDto {
   @IsString()
   @IsOptional()
   @MinLength(3)
-  @MaxLength(1024)
+  @MaxLength(5000)
   fullDescription?: string;
 
   @ApiPropertyOptional({
