@@ -65,6 +65,9 @@ export class PostsController {
     return this.postsService.findAll(limit, page);
   }
 
+  @ApiOperation({
+    summary: 'Fetches a single post of the application by specific id.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Single post fetched successfully',
@@ -99,24 +102,17 @@ export class PostsController {
       mainImage?: Express.Multer.File[];
     },
   ) {
-    try {
-      console.log(files.featureImage);
-      if (files.featureImage && files.featureImage[0]) {
-        createPostDto.featureImageUrl = files.featureImage[0].path.replace(
-          /\\/g,
-          '/',
-        );
-      }
-      if (files.mainImage && files.mainImage[0]) {
-        createPostDto.mainImageUrl = files.mainImage[0].path.replace(
-          /\\/g,
-          '/',
-        );
-      }
-      return this.postsService.create(createPostDto);
-    } catch (error) {
-      console.log(error);
+    if (files.featureImage && files.featureImage[0]) {
+      createPostDto.featureImageUrl = files.featureImage[0].path.replace(
+        /\\/g,
+        '/',
+      );
     }
+    if (files.mainImage && files.mainImage[0]) {
+      createPostDto.mainImageUrl = files.mainImage[0].path.replace(/\\/g, '/');
+    }
+
+    return this.postsService.create(createPostDto);
   }
 
   @ApiResponse({
@@ -124,7 +120,7 @@ export class PostsController {
     description: 'Post updated successfully',
   })
   @ApiOperation({
-    summary: 'Updated existing post of the application.',
+    summary: 'Updated existing post of the application by specific id.',
   })
   public async patchPost(
     @Param('id') id: string,
@@ -135,22 +131,17 @@ export class PostsController {
       mainImage?: Express.Multer.File[];
     },
   ) {
-    try {
-      if (files.featureImage && files.featureImage[0]) {
-        patchPostDto.featureImageUrl = files.featureImage[0].path.replace(
-          /\\/g,
-          '/',
-        );
-      }
-      if (files.mainImage && files.mainImage[0]) {
-        patchPostDto.mainImageUrl = files.mainImage[0].path.replace(/\\/g, '/');
-      }
-
-      return this.postsService.update(id, patchPostDto);
-    } catch (error) {
-      console.error(error);
-      throw error;
+    if (files.featureImage && files.featureImage[0]) {
+      patchPostDto.featureImageUrl = files.featureImage[0].path.replace(
+        /\\/g,
+        '/',
+      );
     }
+    if (files.mainImage && files.mainImage[0]) {
+      patchPostDto.mainImageUrl = files.mainImage[0].path.replace(/\\/g, '/');
+    }
+
+    return this.postsService.update(id, patchPostDto);
   }
 
   @ApiResponse({
@@ -158,7 +149,7 @@ export class PostsController {
     description: 'Post deleted successfully',
   })
   @ApiOperation({
-    summary: 'Deleted existing post of the application.',
+    summary: 'Deleted existing post of the application by specific id.',
   })
   @Delete('/:id')
   public async deletePost(@Param('id') id: string) {

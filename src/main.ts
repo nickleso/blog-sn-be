@@ -6,7 +6,7 @@ import { AllExceptionsFilter } from './filters/exception-filter';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
-const PORT = process.env.PORT;
+const { PORT, PROD_SERVER } = process.env;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -31,8 +31,8 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setVersion('1.0')
     .setTitle('Blog backend API')
-    .setDescription(`Use the base API URL at http://localhost:${PORT}`)
-    .addServer(`http://localhost:${PORT}`)
+    .setDescription(`Use the base API URL at ${PROD_SERVER}/api`)
+    .addServer(PROD_SERVER)
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

@@ -5,7 +5,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 export class GetPostsParamDto {
   @ApiPropertyOptional({
     description: 'Get post with a specific id',
-    example: '603d2149e3bff2546cbed4c4',
+    example: '672d171d0904b0427a878c2f',
   })
   @IsOptional()
   @IsMongoId()

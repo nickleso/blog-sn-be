@@ -18,9 +18,7 @@ export class PostsService {
   constructor(@InjectModel(Post.name) private postModel: Model<Post>) {}
 
   private deleteFile(filePath: string) {
-    fs.unlink(path.resolve(filePath), (err) => {
-      if (err) console.error('Failed to delete file:', err);
-    });
+    fs.unlink(path.resolve(filePath), (_) => {});
   }
 
   async findAll(limit: number, page: number) {
@@ -28,13 +26,12 @@ export class PostsService {
       const [posts, totalPosts] = await Promise.all([
         this.postModel
           .find()
+          .sort({ createdAt: -1 })
           .limit(limit)
           .skip((page - 1) * limit)
           .exec(),
         this.postModel.countDocuments().exec(),
       ]);
-
-      console.log(posts);
 
       return {
         status: HttpStatus.OK,
@@ -48,6 +45,7 @@ export class PostsService {
         },
       };
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException({
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Failed to fetch posts',
